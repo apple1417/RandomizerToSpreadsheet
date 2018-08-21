@@ -3,8 +3,10 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Control;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
@@ -15,7 +17,9 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.RegionUtil;
 import org.apache.poi.xssf.usermodel.*;
-import randomizer_bruteforce.Enums.*;
+import randomizer_bruteforce.Enums.RandomizerMode;
+import randomizer_bruteforce.Enums.ScavengerMode;
+import randomizer_bruteforce.Enums.World;
 import randomizer_bruteforce.GeneratorGeneric;
 import randomizer_bruteforce.TalosProgress;
 
@@ -24,7 +28,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+
+import javafx.scene.text.Font;
 
 
 public class MainWindow extends Application {
@@ -60,6 +69,8 @@ public class MainWindow extends Application {
         ChoiceBox scavenger = new ChoiceBox();
         scavenger.getItems().addAll(ScavengerMode.values());
         scavenger.setValue(ScavengerMode.OFF);
+        // TODO: Properly hide sigils when this is on
+        scavenger.setDisable(true);
 
         ChoiceBox moody = new ChoiceBox();
         moody.getItems().addAll(MoodySigils.values());
@@ -435,13 +446,14 @@ public class MainWindow extends Application {
         sheet = workbook.createSheet("Sigils Per World");
         row = sheet.createRow(0);
         cell = row.createCell(0);
-        cell.setCellValue("World (Inside)");
+        cell.setCellValue("World");
         cell.setCellStyle(styles.get(CustomCellStyles.HEADER));
         cell = row.createCell(1);
         cell.setCellValue("Sigils");
         cell.setCellStyle(styles.get(CustomCellStyles.HEADER));
 
         rowNum = 1;
+        portalNum = 0;
         int maxWidth = 8;
         for (World w : getWorldOrder()) {
             ArrayList<Integer> worldSigilIds = new ArrayList<Integer>();
@@ -454,12 +466,17 @@ public class MainWindow extends Application {
 
             // Don't want to show an empty row
             if (worldSigilIds.size() == 0) {
+                portalNum++;
                 continue;
             }
 
             row = sheet.createRow(rowNum);
             cell = row.createCell(0);
-            cell.setCellValue(worldToName(w));
+            if (topRightBoxes.get(3).isSelected() && mobius == 0) {
+                cell.setCellValue(String.format("%s (leads to %s)", worldToName(World.fromInt(portalNum)), worldToName(w)));
+            } else {
+                cell.setCellValue(worldToName(w));
+            }
             cell.setCellStyle(styles.get(CustomCellStyles.HEADER_BORDERLESS));
 
             // We want to put the stars on the end
@@ -476,6 +493,7 @@ public class MainWindow extends Application {
                 cell.setCellValue(sigil);
                 cell.setCellStyle(styles.get(CustomCellStyles.sigilToStyle(sigil)));
             }
+            portalNum++;
             rowNum++;
         }
         // Bunch of duplicated code, but like before I need to deal with the nexus stars
