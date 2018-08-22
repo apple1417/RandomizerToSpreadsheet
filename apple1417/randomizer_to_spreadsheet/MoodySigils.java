@@ -1,3 +1,5 @@
+package apple1417.randomizer_to_spreadsheet;
+
 public enum MoodySigils {
     OFF("Off"),
     COLOUR("Colour"),

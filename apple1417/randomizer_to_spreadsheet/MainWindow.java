@@ -1,3 +1,10 @@
+package apple1417.randomizer_to_spreadsheet;
+
+import apple1417.randomizer.Enums.RandomizerMode;
+import apple1417.randomizer.Enums.ScavengerMode;
+import apple1417.randomizer.Enums.World;
+import apple1417.randomizer.GeneratorGeneric;
+import apple1417.randomizer.TalosProgress;
 import javafx.application.Application;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -17,11 +24,6 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.RegionUtil;
 import org.apache.poi.xssf.usermodel.*;
-import randomizer_bruteforce.Enums.RandomizerMode;
-import randomizer_bruteforce.Enums.ScavengerMode;
-import randomizer_bruteforce.Enums.World;
-import randomizer_bruteforce.GeneratorGeneric;
-import randomizer_bruteforce.TalosProgress;
 
 import java.awt.Color;
 import java.io.File;
@@ -91,6 +93,7 @@ public class MainWindow extends Application {
                 new Text("Moody Sigils")
         ));
 
+        // Just need something fill the last column
         BorderPane forceSize = new BorderPane();
         forceSize.setMinWidth(100);
         forceSize.setMaxWidth(100);
@@ -192,6 +195,7 @@ public class MainWindow extends Application {
     }
 
     private TalosProgress progress;
+
     private void saveFile(File saveLoc) {
         // No need to process everything if we can't save the file
         if (saveLoc == null) {
@@ -250,7 +254,7 @@ public class MainWindow extends Application {
 
         XSSFCellStyle headerBorderless = styles.get(CustomCellStyles.HEADER_BORDERLESS);
         XSSFFont headerFont = workbook.createFont();
-        headerFont.setFontHeightInPoints((short)14);
+        headerFont.setFontHeightInPoints((short) 14);
         headerFont.setBold(true);
         headerBorderless.setFont(headerFont);
         headerBorderless.setAlignment(HorizontalAlignment.CENTER);
@@ -280,7 +284,7 @@ public class MainWindow extends Application {
         styles.get(CustomCellStyles.HEADER_YELLOW).cloneStyleFrom(styles.get(CustomCellStyles.YELLOW));
         styles.get(CustomCellStyles.HEADER_RED).cloneStyleFrom(styles.get(CustomCellStyles.RED));
 
-        for (CustomCellStyles ccs : new CustomCellStyles[] {
+        for (CustomCellStyles ccs : new CustomCellStyles[]{
                 CustomCellStyles.HEADER_STAR, CustomCellStyles.HEADER_GREEN,
                 CustomCellStyles.HEADER_GREY, CustomCellStyles.HEADER_YELLOW,
                 CustomCellStyles.HEADER_RED}) {
@@ -289,7 +293,6 @@ public class MainWindow extends Application {
             style.setAlignment(HorizontalAlignment.CENTER);
             style.setVerticalAlignment(VerticalAlignment.CENTER);
         }
-
 
 
         // This sheet just has basic info about the randomization
@@ -355,7 +358,6 @@ public class MainWindow extends Application {
         sheet.createRow(0).createCell(0).setCellValue(pickedOptions);
 
 
-
         // This sheet shows the sigil at each location, sorted by world
         sheet = workbook.createSheet("All Sigils");
         row = sheet.createRow(0);
@@ -379,7 +381,7 @@ public class MainWindow extends Application {
 
             row = sheet.createRow(rowNum);
             cell = row.createCell(0);
-            cell.setCellStyle( styles.get(CustomCellStyles.HEADER));
+            cell.setCellStyle(styles.get(CustomCellStyles.HEADER));
             // For random portals without mobius we need to clarify portal/world
             if (topRightBoxes.get(3).isSelected() && mobius == 0) {
                 cell.setCellValue(String.format("%s (leads to %s)", worldToName(World.fromInt(portalNum)), worldToName(w)));
@@ -436,10 +438,9 @@ public class MainWindow extends Application {
         sheet.autoSizeColumn(1);
         // Weird stuff happens if I just try to surround the whole thing with a single range
         RegionUtil.setBorderTop(BorderStyle.THIN, new CellRangeAddress(0, 0, 0, 1), sheet);
-        RegionUtil.setBorderTop(BorderStyle.THIN, new CellRangeAddress(rowNum, rowNum , 0, 1), sheet);
+        RegionUtil.setBorderTop(BorderStyle.THIN, new CellRangeAddress(rowNum, rowNum, 0, 1), sheet);
         RegionUtil.setBorderLeft(BorderStyle.THIN, new CellRangeAddress(0, rowNum - 1, 0, 0), sheet);
         RegionUtil.setBorderLeft(BorderStyle.THIN, new CellRangeAddress(0, rowNum - 1, 2, 2), sheet);
-
 
 
         // This sheet shows what sigils are available in each world, like on the signs
@@ -481,7 +482,7 @@ public class MainWindow extends Application {
 
             // We want to put the stars on the end
             int starCount = worldSigilIds.size();
-            worldSigilIds.removeIf(x -> x <=30);
+            worldSigilIds.removeIf(x -> x <= 30);
             starCount -= worldSigilIds.size();
             Collections.sort(worldSigilIds);
             // We don't care what star specifically so I can use the same id for them all
@@ -527,12 +528,11 @@ public class MainWindow extends Application {
         }
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 1, maxWidth));
         RegionUtil.setBorderTop(BorderStyle.THIN, new CellRangeAddress(0, 0, 0, maxWidth), sheet);
-        RegionUtil.setBorderTop(BorderStyle.THIN, new CellRangeAddress(rowNum, rowNum , 0, maxWidth), sheet);
+        RegionUtil.setBorderTop(BorderStyle.THIN, new CellRangeAddress(rowNum, rowNum, 0, maxWidth), sheet);
         RegionUtil.setBorderLeft(BorderStyle.THIN, new CellRangeAddress(0, rowNum - 1, maxWidth + 1, maxWidth + 1), sheet);
         CellRangeAddress cellRange = new CellRangeAddress(0, rowNum - 1, 0, 0);
         RegionUtil.setBorderLeft(BorderStyle.THIN, cellRange, sheet);
         RegionUtil.setBorderRight(BorderStyle.THIN, cellRange, sheet);
-
 
 
         // This sheet shows all locations for a certain sigil type
@@ -546,7 +546,7 @@ public class MainWindow extends Application {
         cell.setCellStyle(styles.get(CustomCellStyles.HEADER));
 
         // Map all locations to a sigil type
-        HashMap<String, ArrayList<String >> sigilLocations = new HashMap<String, ArrayList<String >>();
+        HashMap<String, ArrayList<String>> sigilLocations = new HashMap<String, ArrayList<String>>();
         for (String marker : allMarkers) {
             String sigil = getSigil(progress, marker);
             if (!sigilLocations.containsKey(sigil)) {
@@ -617,16 +617,16 @@ public class MainWindow extends Application {
         RegionUtil.setBorderTop(BorderStyle.THIN, new CellRangeAddress(26, 26, 0, 0), sheet);
 
 
-
         // Finally save the workbook
         try {
             workbook.write(outFile);
             outFile.close();
-        } catch (IOException e) {}
+        } catch (IOException e) {
+        }
     }
 
     private static HashMap<String, String> createMarkerToName() {
-        HashMap<String, String> out =  new HashMap<String, String>();
+        HashMap<String, String> out = new HashMap<String, String>();
         out.put("A1-ASooR", "A Switch out of Reach");
         out.put("A1-Beaten Path", "Striding the Beaten Path");
         out.put("A1-OtToU", "Only the Two of Us");
@@ -758,16 +758,23 @@ public class MainWindow extends Application {
         out.put("F3-Star", "Floor 3 Star");
         return out;
     }
+
     private static HashMap<String, String> markerToName = createMarkerToName();
 
     private static String worldToName(World w) {
         switch (w) {
-            case A8: return "A Star";
-            case ADEVISLAND: return "Developer Island";
-            case B8: return "B Star";
-            case C8: return "C Star";
-            case CMESSENGER: return "C Messenger";
-            default: return w.toString();
+            case A8:
+                return "A Star";
+            case ADEVISLAND:
+                return "Developer Island";
+            case B8:
+                return "B Star";
+            case C8:
+                return "C Star";
+            case CMESSENGER:
+                return "C Messenger";
+            default:
+                return w.toString();
         }
     }
 
@@ -777,35 +784,37 @@ public class MainWindow extends Application {
 
     private static HashMap<World, String[]> createWorldToMarkers() {
         HashMap<World, String[]> out = new HashMap<World, String[]>();
-        out.put(World.A1, new String[] {"A1-PaSL", "A1-Beaten Path", "A1-Outnumbered", "A1-OtToU", "A1-ASooR", "A1-Trio", "A1-Peephole", "A1-Star"});
-        out.put(World.A2, new String[] {"A2-Guards", "A2-Hall of Windows", "A2-Suicide Mission", "A2-Star"});
-        out.put(World.A3, new String[] {"A3-Stashed for Later", "A3-ABTU", "A3-ABTU Star", "A3-Swallowed the Key", "A3-AEP", "A3-Clock Star"});
-        out.put(World.A4, new String[] {"A4-Branch it Out", "A4-Above All That", "A4-Push it Further", "A4-Star", "A4-DCtS"});
-        out.put(World.A5, new String[] {"A5-Two Boxes", "A5-Two Boxes Star", "A5-YKYMCTS", "A5-Over the Fence", "A5-OLB", "A5-FC", "A5-FC Star"});
-        out.put(World.A6, new String[] {"A6-Mobile Mindfield", "A6-Deception", "A6-Door too Far", "A6-Bichromatic", "A6-Star"});
-        out.put(World.A7, new String[] {"A7-LFI", "A7-Trapped Inside", "A7-Two Buzzers", "A7-Star", "A7-WiaL", "A7-Pinhole"});
-        out.put(World.A8, new String[] {"A*-JfW", "A*-Nervewrecker", "A*-DDM"});
+        out.put(World.A1, new String[]{"A1-PaSL", "A1-Beaten Path", "A1-Outnumbered", "A1-OtToU", "A1-ASooR", "A1-Trio", "A1-Peephole", "A1-Star"});
+        out.put(World.A2, new String[]{"A2-Guards", "A2-Hall of Windows", "A2-Suicide Mission", "A2-Star"});
+        out.put(World.A3, new String[]{"A3-Stashed for Later", "A3-ABTU", "A3-ABTU Star", "A3-Swallowed the Key", "A3-AEP", "A3-Clock Star"});
+        out.put(World.A4, new String[]{"A4-Branch it Out", "A4-Above All That", "A4-Push it Further", "A4-Star", "A4-DCtS"});
+        out.put(World.A5, new String[]{"A5-Two Boxes", "A5-Two Boxes Star", "A5-YKYMCTS", "A5-Over the Fence", "A5-OLB", "A5-FC", "A5-FC Star"});
+        out.put(World.A6, new String[]{"A6-Mobile Mindfield", "A6-Deception", "A6-Door too Far", "A6-Bichromatic", "A6-Star"});
+        out.put(World.A7, new String[]{"A7-LFI", "A7-Trapped Inside", "A7-Two Buzzers", "A7-Star", "A7-WiaL", "A7-Pinhole"});
+        out.put(World.A8, new String[]{"A*-JfW", "A*-Nervewrecker", "A*-DDM"});
         out.put(World.ADEVISLAND, new String[0]);
-        out.put(World.B1, new String[] {"B1-WtaD", "B1-Third Wheel", "B1-Over the Fence", "B1-RoD", "B1-SaaS", "B1-Star"});
-        out.put(World.B2, new String[] {"B2-Tomb", "B2-Star", "B2-MotM", "B2-Moonshot", "B2-Higher Ground"});
-        out.put(World.B3, new String[] {"B3-Blown Away", "B3-Star", "B3-Sunshot", "B3-Eagle's Nest", "B3-Woosh"});
-        out.put(World.B4, new String[] {"B4-Self Help", "B4-Double-Plate", "B4-TRA", "B4-TRA Star", "B4-RPS", "B4-ABUH", "B4-WAtC", "B4-Sphinx Star"});
-        out.put(World.B5, new String[] {"B5-SES", "B5-Plates", "B5-Two Jammers", "B5-Iron Curtain", "B5-Chambers", "B5-Obelisk Star"});
-        out.put(World.B6, new String[] {"B6-Crisscross", "B6-JDaW", "B6-Egyptian Arcade"});
-        out.put(World.B7, new String[] {"B7-AFaF", "B7-WLJ", "B7-BSbS", "B7-BSbS Star", "B7-BLoM", "B7-Star"});
-        out.put(World.B8, new String[] {"B*-Merry Go Round", "B*-Cat's Cradle", "B*-Peekaboo"});
-        out.put(World.C1, new String[] {"C1-Conservatory", "C1-MIA", "C1-Labyrinth", "C1-Blowback", "C1-Star",});
-        out.put(World.C2, new String[] {"C2-ADaaF", "C2-Star", "C2-Rapunzel", "C2-Cemetery", "C2-Short Wall",});
-        out.put(World.C3, new String[] {"C3-Three Connectors", "C3-Jammer Quarantine", "C3-BSLS", "C3-Weathertop", "C3-Star",});
-        out.put(World.C4, new String[] {"C4-Armory", "C4-Oubliette", "C4-Oubliette Star", "C4-Stables", "C4-Throne Room", "C4-Throne Room Star",});
-        out.put(World.C5, new String[] {"C5-Time Flies", "C5-Time Flies Star", "C5-Time Crawls", "C5-Dumbwaiter", "C5-Dumbwaiter Star", "C5-UCaJ", "C5-UCAJ Star",});
-        out.put(World.C6, new String[] {"C6-Seven Doors", "C6-Star", "C6-Circumlocution", "C6-Two Way Street",});
-        out.put(World.C7, new String[] {"C7-Carrier Pigeons", "C7-DMS", "C7-Star", "C7-Prison Break", "C7-Crisscross",});
-        out.put(World.C8, new String[] {"C*-Unreachable Garden", "C*-Nexus", "C*-Cobweb"});
-        out.put(World.CMESSENGER, new String[] {"CM-Star"});
+        out.put(World.B1, new String[]{"B1-WtaD", "B1-Third Wheel", "B1-Over the Fence", "B1-RoD", "B1-SaaS", "B1-Star"});
+        out.put(World.B2, new String[]{"B2-Tomb", "B2-Star", "B2-MotM", "B2-Moonshot", "B2-Higher Ground"});
+        out.put(World.B3, new String[]{"B3-Blown Away", "B3-Star", "B3-Sunshot", "B3-Eagle's Nest", "B3-Woosh"});
+        out.put(World.B4, new String[]{"B4-Self Help", "B4-Double-Plate", "B4-TRA", "B4-TRA Star", "B4-RPS", "B4-ABUH", "B4-WAtC", "B4-Sphinx Star"});
+        out.put(World.B5, new String[]{"B5-SES", "B5-Plates", "B5-Two Jammers", "B5-Iron Curtain", "B5-Chambers", "B5-Obelisk Star"});
+        out.put(World.B6, new String[]{"B6-Crisscross", "B6-JDaW", "B6-Egyptian Arcade"});
+        out.put(World.B7, new String[]{"B7-AFaF", "B7-WLJ", "B7-BSbS", "B7-BSbS Star", "B7-BLoM", "B7-Star"});
+        out.put(World.B8, new String[]{"B*-Merry Go Round", "B*-Cat's Cradle", "B*-Peekaboo"});
+        out.put(World.C1, new String[]{"C1-Conservatory", "C1-MIA", "C1-Labyrinth", "C1-Blowback", "C1-Star",});
+        out.put(World.C2, new String[]{"C2-ADaaF", "C2-Star", "C2-Rapunzel", "C2-Cemetery", "C2-Short Wall",});
+        out.put(World.C3, new String[]{"C3-Three Connectors", "C3-Jammer Quarantine", "C3-BSLS", "C3-Weathertop", "C3-Star",});
+        out.put(World.C4, new String[]{"C4-Armory", "C4-Oubliette", "C4-Oubliette Star", "C4-Stables", "C4-Throne Room", "C4-Throne Room Star",});
+        out.put(World.C5, new String[]{"C5-Time Flies", "C5-Time Flies Star", "C5-Time Crawls", "C5-Dumbwaiter", "C5-Dumbwaiter Star", "C5-UCaJ", "C5-UCAJ Star",});
+        out.put(World.C6, new String[]{"C6-Seven Doors", "C6-Star", "C6-Circumlocution", "C6-Two Way Street",});
+        out.put(World.C7, new String[]{"C7-Carrier Pigeons", "C7-DMS", "C7-Star", "C7-Prison Break", "C7-Crisscross",});
+        out.put(World.C8, new String[]{"C*-Unreachable Garden", "C*-Nexus", "C*-Cobweb"});
+        out.put(World.CMESSENGER, new String[]{"CM-Star"});
         return out;
     }
+
     private static HashMap<World, String[]> worldToMarkers = createWorldToMarkers();
+
     private ArrayList<String> getWorldMarkers(World w) {
         ArrayList<String> out = new ArrayList<String>(Arrays.asList(worldToMarkers.get(w)));
 
@@ -823,6 +832,14 @@ public class MainWindow extends Application {
         if (F3 == worldIndex) {
             out.add("F3-Star");
         }
+
+        /*
+        // Scavenger only shows certain sigil types, so we remove markers leading to others
+        if (progress.getVar("Randomizer_Scavenger") != 0) {
+            ScavengerEnding ending = ScavengerEnding.fromInt(progress.getVar("Randomizer_ScavengerMode") - 1);
+            ArrayList<String> allowedSigils = ending.getAllowedSigils();
+        }
+        */
 
         return out;
     }
@@ -856,31 +873,12 @@ public class MainWindow extends Application {
         return out;
     }
 
-    private String[] getExtraMobiusMarkers(World w) {
-        if (progress.getVar("Randomizer_Loop") != 0) {
-            int worldIndex = Arrays.asList(World.values()).indexOf(w) + 1;
-            // Dev Island is skipped
-            if (worldIndex > 8) {
-                worldIndex--;
-            }
-            int F0 = (progress.getVar("Randomizer_LoopF0") + 1) / 2;
-            int F3 = (progress.getVar("Randomizer_LoopF3") + 1) / 2;
-            if (worldIndex == F0 && worldIndex == F3) {
-                return new String[] {"F0-Star", "F3-Star"};
-            } if (worldIndex == F0) {
-                return new String[] {"F0-Star"};
-            } else if (worldIndex == F3) {
-                return new String[] {"F3-Star"};
-            }
-        }
-        return new String[0];
-    }
-
-    private static String[] paint3Order = new String[] {
-        "A", "E", "F", "D", "E", "F", "D", "E",
-        "I", "A", "B", "C", "A", "B", "C", "A",
-        "E", "I", "G", "H", "I", "G", "H", "I"
+    private static String[] paint3Order = new String[]{
+            "A", "E", "F", "D", "E", "F", "D", "E",
+            "I", "A", "B", "C", "A", "B", "C", "A",
+            "E", "I", "G", "H", "I", "G", "H", "I"
     };
+
     private static String paint3(int seed) {
         return paint3Order[seed % 24];
     }
@@ -889,75 +887,77 @@ public class MainWindow extends Application {
         return Integer.toString((seed % 8 > 4) ? (seed - 4) % 8 : seed % 8);
     }
 
-    private static int[] paint5aOrder = new int[] {
-        3, 4, 3, 2, 1, 0, 4, 3,
-        1, 2, 1, 0, 4, 3, 2, 1,
-        4, 0, 4, 3, 2, 1, 0, 4,
-        2, 3, 2, 1, 0, 4, 3, 2,
-        0, 1, 0, 4, 3, 2, 1, 0
+    private static int[] paint5aOrder = new int[]{
+            3, 4, 3, 2, 1, 0, 4, 3,
+            1, 2, 1, 0, 4, 3, 2, 1,
+            4, 0, 4, 3, 2, 1, 0, 4,
+            2, 3, 2, 1, 0, 4, 3, 2,
+            0, 1, 0, 4, 3, 2, 1, 0
     };
-    private static String[] paint5aNames = new String[] {
-        "Behind Amphitheatre / Far C",
-        "Suicide Mission / 20%",
-        "Amphitheatre / Tower",
-        "A2 Star / B",
-        "Spawn / A/C"
+    private static String[] paint5aNames = new String[]{
+            "Behind Amphitheatre / Far C",
+            "Suicide Mission / 20%",
+            "Amphitheatre / Tower",
+            "A2 Star / B",
+            "Spawn / A/C"
     };
+
     private static String paint5a(int seed) {
         return paint5aNames[paint5aOrder[seed % 40]];
     }
 
-    private static int[] paint5bOrder = new int[] {
-        4, 0, 0, 0, 0, 0, 0, 0,
-        2, 3, 3, 3, 3, 3, 3, 3,
-        0, 1, 1, 1, 1, 1, 1, 1,
-        3, 4, 4, 4, 4, 4, 4, 4,
-        1, 2, 2, 2, 2, 2, 2, 2,
+    private static int[] paint5bOrder = new int[]{
+            4, 0, 0, 0, 0, 0, 0, 0,
+            2, 3, 3, 3, 3, 3, 3, 3,
+            0, 1, 1, 1, 1, 1, 1, 1,
+            3, 4, 4, 4, 4, 4, 4, 4,
+            1, 2, 2, 2, 2, 2, 2, 2,
     };
-    private static String[] paint5bNames = new String[] {
-        "LMUStK / JfW/Nervewrecker",
-        "ABTU/SfL / Right of Spawn",
-        "AEP / JfW/Middle",
-        "LMUStK/SfL / Middle",
-        "SfL / Left of Spawn"
+    private static String[] paint5bNames = new String[]{
+            "LMUStK / JfW/Nervewrecker",
+            "ABTU/SfL / Right of Spawn",
+            "AEP / JfW/Middle",
+            "LMUStK/SfL / Middle",
+            "SfL / Left of Spawn"
     };
+
     private static String paint5b(int seed) {
         return paint5bNames[paint5bOrder[seed % 40]];
     }
 
-    private static String[] allMarkers = new String[] {
-        "A1-ASooR", "A1-Beaten Path", "A1-OtToU", "A1-Outnumbered",
-        "A1-PaSL", "A1-Peephole", "A1-Star", "A1-Trio",
-        "A2-Guards", "A2-Hall of Windows", "A2-Star", "A2-Suicide Mission",
-        "A3-ABTU Star", "A3-ABTU", "A3-AEP", "A3-Clock Star",
-        "A3-Stashed for Later", "A3-Swallowed the Key", "A4-Above All That", "A4-Branch it Out",
-        "A4-DCtS", "A4-Push it Further", "A4-Star", "A5-FC Star",
-        "A5-FC", "A5-OLB", "A5-Over the Fence", "A5-Two Boxes Star",
-        "A5-Two Boxes", "A5-YKYMCTS", "A6-Bichromatic", "A6-Deception",
-        "A6-Door too Far", "A6-Mobile Mindfield", "A6-Star", "A7-LFI",
-        "A7-Pinhole", "A7-Star", "A7-Trapped Inside", "A7-Two Buzzers",
-        "A7-WiaL", "A*-DDM", "A*-JfW", "A*-Nervewrecker",
-        "B1-Over the Fence", "B1-RoD", "B1-SaaS", "B1-Star",
-        "B1-Third Wheel", "B1-WtaD", "B2-Higher Ground", "B2-Moonshot",
-        "B2-MotM", "B2-Star", "B2-Tomb", "B3-Blown Away",
-        "B3-Eagle's Nest", "B3-Star", "B3-Sunshot", "B3-Woosh",
-        "B4-ABUH", "B4-Double-Plate", "B4-RPS", "B4-Self Help",
-        "B4-Sphinx Star", "B4-TRA Star", "B4-TRA", "B4-WAtC",
-        "B5-Chambers", "B5-Iron Curtain", "B5-Obelisk Star", "B5-Plates",
-        "B5-SES", "B5-Two Jammers", "B6-Crisscross", "B6-Egyptian Arcade",
-        "B6-JDaW", "B7-AFaF", "B7-BLoM", "B7-BSbS Star",
-        "B7-BSbS", "B7-Star", "B7-WLJ", "B*-Cat's Cradle",
-        "B*-Merry Go Round", "B*-Peekaboo", "C1-Blowback", "C1-Conservatory",
-        "C1-Labyrinth", "C1-MIA", "C1-Star", "C2-ADaaF",
-        "C2-Cemetery", "C2-Rapunzel", "C2-Short Wall", "C2-Star",
-        "C3-BSLS", "C3-Jammer Quarantine", "C3-Star", "C3-Three Connectors",
-        "C3-Weathertop", "C4-Armory", "C4-Oubliette Star", "C4-Oubliette",
-        "C4-Stables", "C4-Throne Room Star", "C4-Throne Room", "C5-Dumbwaiter Star",
-        "C5-Dumbwaiter", "C5-Time Crawls", "C5-Time Flies Star", "C5-Time Flies",
-        "C5-UCAJ Star", "C5-UCaJ", "C6-Circumlocution", "C6-Seven Doors",
-        "C6-Star", "C6-Two Way Street", "C7-Carrier Pigeons", "C7-Crisscross",
-        "C7-DMS", "C7-Prison Break", "C7-Star", "C*-Cobweb",
-        "C*-Nexus", "C*-Unreachable Garden", "CM-Star", "F0-Star",
-        "F3-Star"
+    private static String[] allMarkers = new String[]{
+            "A1-ASooR", "A1-Beaten Path", "A1-OtToU", "A1-Outnumbered",
+            "A1-PaSL", "A1-Peephole", "A1-Star", "A1-Trio",
+            "A2-Guards", "A2-Hall of Windows", "A2-Star", "A2-Suicide Mission",
+            "A3-ABTU Star", "A3-ABTU", "A3-AEP", "A3-Clock Star",
+            "A3-Stashed for Later", "A3-Swallowed the Key", "A4-Above All That", "A4-Branch it Out",
+            "A4-DCtS", "A4-Push it Further", "A4-Star", "A5-FC Star",
+            "A5-FC", "A5-OLB", "A5-Over the Fence", "A5-Two Boxes Star",
+            "A5-Two Boxes", "A5-YKYMCTS", "A6-Bichromatic", "A6-Deception",
+            "A6-Door too Far", "A6-Mobile Mindfield", "A6-Star", "A7-LFI",
+            "A7-Pinhole", "A7-Star", "A7-Trapped Inside", "A7-Two Buzzers",
+            "A7-WiaL", "A*-DDM", "A*-JfW", "A*-Nervewrecker",
+            "B1-Over the Fence", "B1-RoD", "B1-SaaS", "B1-Star",
+            "B1-Third Wheel", "B1-WtaD", "B2-Higher Ground", "B2-Moonshot",
+            "B2-MotM", "B2-Star", "B2-Tomb", "B3-Blown Away",
+            "B3-Eagle's Nest", "B3-Star", "B3-Sunshot", "B3-Woosh",
+            "B4-ABUH", "B4-Double-Plate", "B4-RPS", "B4-Self Help",
+            "B4-Sphinx Star", "B4-TRA Star", "B4-TRA", "B4-WAtC",
+            "B5-Chambers", "B5-Iron Curtain", "B5-Obelisk Star", "B5-Plates",
+            "B5-SES", "B5-Two Jammers", "B6-Crisscross", "B6-Egyptian Arcade",
+            "B6-JDaW", "B7-AFaF", "B7-BLoM", "B7-BSbS Star",
+            "B7-BSbS", "B7-Star", "B7-WLJ", "B*-Cat's Cradle",
+            "B*-Merry Go Round", "B*-Peekaboo", "C1-Blowback", "C1-Conservatory",
+            "C1-Labyrinth", "C1-MIA", "C1-Star", "C2-ADaaF",
+            "C2-Cemetery", "C2-Rapunzel", "C2-Short Wall", "C2-Star",
+            "C3-BSLS", "C3-Jammer Quarantine", "C3-Star", "C3-Three Connectors",
+            "C3-Weathertop", "C4-Armory", "C4-Oubliette Star", "C4-Oubliette",
+            "C4-Stables", "C4-Throne Room Star", "C4-Throne Room", "C5-Dumbwaiter Star",
+            "C5-Dumbwaiter", "C5-Time Crawls", "C5-Time Flies Star", "C5-Time Flies",
+            "C5-UCAJ Star", "C5-UCaJ", "C6-Circumlocution", "C6-Seven Doors",
+            "C6-Star", "C6-Two Way Street", "C7-Carrier Pigeons", "C7-Crisscross",
+            "C7-DMS", "C7-Prison Break", "C7-Star", "C*-Cobweb",
+            "C*-Nexus", "C*-Unreachable Garden", "CM-Star", "F0-Star",
+            "F3-Star"
     };
 }
