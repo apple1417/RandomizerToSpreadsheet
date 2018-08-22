@@ -1,6 +1,7 @@
 package apple1417.randomizer_to_spreadsheet;
 
 import apple1417.randomizer.Enums.RandomizerMode;
+import apple1417.randomizer.Enums.ScavengerEnding;
 import apple1417.randomizer.Enums.ScavengerMode;
 import apple1417.randomizer.Enums.World;
 import apple1417.randomizer.GeneratorGeneric;
@@ -71,8 +72,6 @@ public class MainWindow extends Application {
         ChoiceBox scavenger = new ChoiceBox();
         scavenger.getItems().addAll(ScavengerMode.values());
         scavenger.setValue(ScavengerMode.OFF);
-        // TODO: Properly hide sigils when this is on
-        scavenger.setDisable(true);
 
         ChoiceBox moody = new ChoiceBox();
         moody.getItems().addAll(MoodySigils.values());
@@ -87,10 +86,10 @@ public class MainWindow extends Application {
 
         ArrayList<Text> leftLabels = new ArrayList<Text>();
         leftLabels.addAll(Arrays.asList(
-                new Text("Seed"),
-                new Text("Mode"),
-                new Text("Scavenger Hunt"),
-                new Text("Moody Sigils")
+            new Text("Seed"),
+            new Text("Mode"),
+            new Text("Scavenger Hunt"),
+            new Text("Moody Sigils")
         ));
 
         // Just need something fill the last column
@@ -99,35 +98,35 @@ public class MainWindow extends Application {
         forceSize.setMaxWidth(100);
 
         root.addColumn(0,
-                leftLabels.get(0),
-                leftLabels.get(1),
-                leftLabels.get(2),
-                leftLabels.get(3),
-                forceSize
+            leftLabels.get(0),
+            leftLabels.get(1),
+            leftLabels.get(2),
+            leftLabels.get(3),
+            forceSize
         );
         root.addColumn(1,
-                seed,
-                mode,
-                scavenger,
-                moody
+            seed,
+            mode,
+            scavenger,
+            moody
         );
 
         // Right side, standard checkbox options
         topRightLabels = new ArrayList<Text>();
         topRightLabels.addAll(Arrays.asList(
-                new Text("Open All Worlds"),
-                new Text("Unlock All Items"),
-                new Text("Show Full Signs"),
-                new Text("Random Portals"),
-                new Text("")
+            new Text("Open All Worlds"),
+            new Text("Unlock All Items"),
+            new Text("Show Full Signs"),
+            new Text("Random Portals"),
+            new Text("")
         ));
         bottomRightLabels = new ArrayList<Text>();
         bottomRightLabels.addAll(Arrays.asList(
-                new Text("All Sigils"),
-                new Text("All of a Shape"),
-                new Text("All of a Colour"),
-                new Text("Eternalize Ending"),
-                new Text("Two Tower Floors")
+            new Text("All Sigils"),
+            new Text("All of a Shape"),
+            new Text("All of a Colour"),
+            new Text("Eternalize Ending"),
+            new Text("Two Tower Floors")
         ));
 
         for (int i = 0; i < 5; i++) {
@@ -285,9 +284,9 @@ public class MainWindow extends Application {
         styles.get(CustomCellStyles.HEADER_RED).cloneStyleFrom(styles.get(CustomCellStyles.RED));
 
         for (CustomCellStyles ccs : new CustomCellStyles[]{
-                CustomCellStyles.HEADER_STAR, CustomCellStyles.HEADER_GREEN,
-                CustomCellStyles.HEADER_GREY, CustomCellStyles.HEADER_YELLOW,
-                CustomCellStyles.HEADER_RED}) {
+            CustomCellStyles.HEADER_STAR, CustomCellStyles.HEADER_GREEN,
+            CustomCellStyles.HEADER_GREY, CustomCellStyles.HEADER_YELLOW,
+            CustomCellStyles.HEADER_RED}) {
             CellStyle style = styles.get(ccs);
             style.setFont(headerFont);
             style.setAlignment(HorizontalAlignment.CENTER);
@@ -326,7 +325,7 @@ public class MainWindow extends Application {
         row.createCell(0).setCellValue("Floor 6:");
         row.createCell(1).setCellValue(progress.getVar("Code_Floor6"));
 
-        String pickedOptions = String.format("%d/%s", seed, ((ChoiceBox) leftOptions.get(1)).getValue().toString());
+        String pickedOptions = String.format("%d/%s", seed, RandomizerMode.fromInt(mode).toString());
         for (int i = 0; i < topRightBoxes.size(); i++) {
             if (topRightBoxes.get(i).isSelected()) {
                 pickedOptions += "/" + topRightLabels.get(i).getText();
@@ -343,13 +342,13 @@ public class MainWindow extends Application {
             }
         }
 
-        ScavengerMode scavengerChoice = (ScavengerMode) ((ChoiceBox) leftOptions.get(2)).getValue();
+        ScavengerMode scavengerChoice = ScavengerMode.fromInt(scavenger);
         if (scavengerChoice != ScavengerMode.OFF) {
-            pickedOptions += "/" + scavengerChoice.toString();
+            pickedOptions += "/" + scavengerChoice.toString() + " Scavenger";
         }
-        MoodySigils moodyChoice = (MoodySigils) ((ChoiceBox) leftOptions.get(3)).getValue();
+        MoodySigils moodyChoice = MoodySigils.fromInt(moody);
         if (moodyChoice != MoodySigils.OFF) {
-            pickedOptions += "/" + moodyChoice.toString();
+            pickedOptions += "/Moody " + moodyChoice.toString();
         }
 
         // Doing this before adding pickedOptions because that's supposed to go over
@@ -413,23 +412,28 @@ public class MainWindow extends Application {
 
         // This is a bunch of duplicated code but I need a way to deal with the tower stars
         if (mobius == 0) {
-            row = sheet.createRow(rowNum);
-            cell = row.createCell(0);
-            cell.setCellStyle(styles.get(CustomCellStyles.HEADER));
-            cell.setCellValue("Nexus");
-            CellRangeAddress cellRange = new CellRangeAddress(rowNum, rowNum, 0, 1);
-            sheet.addMergedRegion(cellRange);
-            RegionUtil.setBorderLeft(BorderStyle.THIN, cellRange, sheet);
-            RegionUtil.setBorderRight(BorderStyle.THIN, cellRange, sheet);
-            rowNum++;
-            for (String marker : new String[]{"F0-Star", "F3-Star"}) {
+            ArrayList<String> markers = removeHiddenScavengerSigils(
+                new ArrayList<String>(Arrays.asList("F0-Star", "F3-Star"))
+            );
+            if (markers.size() > 0) {
                 row = sheet.createRow(rowNum);
-                row.createCell(0).setCellValue(markerToName.get(marker));
-                cell = row.createCell(1);
-                String sigil = getSigil(progress, marker);
-                cell.setCellValue(sigil);
-                cell.setCellStyle(styles.get(CustomCellStyles.sigilToStyle(sigil)));
+                cell = row.createCell(0);
+                cell.setCellStyle(styles.get(CustomCellStyles.HEADER));
+                cell.setCellValue("Nexus");
+                CellRangeAddress cellRange = new CellRangeAddress(rowNum, rowNum, 0, 1);
+                sheet.addMergedRegion(cellRange);
+                RegionUtil.setBorderLeft(BorderStyle.THIN, cellRange, sheet);
+                RegionUtil.setBorderRight(BorderStyle.THIN, cellRange, sheet);
                 rowNum++;
+                for (String marker : markers) {
+                    String sigil = getSigil(progress, marker);
+                    row = sheet.createRow(rowNum);
+                    row.createCell(0).setCellValue(markerToName.get(marker));
+                    cell = row.createCell(1);
+                    cell.setCellValue(sigil);
+                    cell.setCellStyle(styles.get(CustomCellStyles.sigilToStyle(sigil)));
+                    rowNum++;
+                }
             }
         }
 
@@ -455,7 +459,7 @@ public class MainWindow extends Application {
 
         rowNum = 1;
         portalNum = 0;
-        int maxWidth = 8;
+        int maxWidth = 1;
         for (World w : getWorldOrder()) {
             ArrayList<Integer> worldSigilIds = new ArrayList<Integer>();
             for (String marker : getWorldMarkers(w)) {
@@ -499,27 +503,32 @@ public class MainWindow extends Application {
         }
         // Bunch of duplicated code, but like before I need to deal with the nexus stars
         if (mobius == 0) {
-            row = sheet.createRow(rowNum);
-            cell = row.createCell(0);
-            cell.setCellValue("Nexus");
-            cell.setCellStyle(styles.get(CustomCellStyles.HEADER_BORDERLESS));
-            int F0 = progress.getVar("F0-Star");
-            int F3 = progress.getVar("F3-Star");
-            // There're only ever going to be two sigils here so I can just swap the ids
-            if (F0 <= 30 || F0 > F3) {
-                int tmp = F3;
-                F3 = F0;
-                F0 = tmp;
+            ArrayList<String> markers = removeHiddenScavengerSigils(
+                new ArrayList<String>(Arrays.asList("F0-Star", "F3-Star"))
+            );
+            if (markers.size() > 0) {
+                row = sheet.createRow(rowNum);
+                cell = row.createCell(0);
+                cell.setCellValue("Nexus");
+                cell.setCellStyle(styles.get(CustomCellStyles.HEADER_BORDERLESS));
+                int F0 = progress.getVar("F0-Star");
+                int F3 = progress.getVar("F3-Star");
+                // There're only ever going to be two sigils here so I can just swap the ids
+                if (F0 <= 30 || F0 > F3) {
+                    int tmp = F3;
+                    F3 = F0;
+                    F0 = tmp;
+                }
+                String sigil = TalosProgress.TETROS[F0].substring(0, 2);
+                cell = row.createCell(1);
+                cell.setCellValue(sigil);
+                cell.setCellStyle(styles.get(CustomCellStyles.sigilToStyle(sigil)));
+                sigil = TalosProgress.TETROS[F3].substring(0, 2);
+                cell = row.createCell(2);
+                cell.setCellValue(sigil);
+                cell.setCellStyle(styles.get(CustomCellStyles.sigilToStyle(sigil)));
+                rowNum++;
             }
-            String sigil = TalosProgress.TETROS[F0].substring(0, 2);
-            cell = row.createCell(1);
-            cell.setCellValue(sigil);
-            cell.setCellStyle(styles.get(CustomCellStyles.sigilToStyle(sigil)));
-            sigil = TalosProgress.TETROS[F3].substring(0, 2);
-            cell = row.createCell(2);
-            cell.setCellValue(sigil);
-            cell.setCellStyle(styles.get(CustomCellStyles.sigilToStyle(sigil)));
-            rowNum++;
         }
         // Tidy the sheet up a bit
         sheet.autoSizeColumn(0);
@@ -535,7 +544,7 @@ public class MainWindow extends Application {
         RegionUtil.setBorderRight(BorderStyle.THIN, cellRange, sheet);
 
 
-        // This sheet shows all locations for a certain sigil type
+        // This sheet shows all locations sorted by sigil type
         sheet = workbook.createSheet("Locations by Sigil Type");
         row = sheet.createRow(0);
         cell = row.createCell(0);
@@ -546,9 +555,19 @@ public class MainWindow extends Application {
         cell.setCellStyle(styles.get(CustomCellStyles.HEADER));
 
         // Map all locations to a sigil type
+        ArrayList<String> allowedSigils = null;
+        if (scavengerChoice != ScavengerMode.OFF) {
+            allowedSigils = ScavengerEnding.fromInt(progress.getVar("Randomizer_ScavengerMode") - 1).getAllowedSigils();
+        }
         HashMap<String, ArrayList<String>> sigilLocations = new HashMap<String, ArrayList<String>>();
         for (String marker : allMarkers) {
-            String sigil = getSigil(progress, marker);
+            String sigil = TalosProgress.TETROS[progress.getVar(marker)];
+            if (allowedSigils != null) {
+                if (!allowedSigils.contains(sigil)) {
+                    continue;
+                }
+            }
+            sigil = sigil.substring(0, 2);
             if (!sigilLocations.containsKey(sigil)) {
                 sigilLocations.put(sigil, new ArrayList<String>());
             }
@@ -558,26 +577,28 @@ public class MainWindow extends Application {
         // We want to show the sigil types in alphabetical order so colours are grouped
         ArrayList<String> sigilTypes = new ArrayList<String>(sigilLocations.keySet());
         Collections.sort(sigilTypes);
+        rowNum = 1;
 
         // Handle stars first, they'll span three rows instead of one
-        sigilTypes.remove("**");
-        ArrayList<String> stars = sigilLocations.get("**");
-        Collections.sort(stars);
+        if (scavengerChoice == ScavengerMode.OFF) {
+            sigilTypes.remove("**");
+            ArrayList<String> stars = sigilLocations.get("**");
+            Collections.sort(stars);
 
-        rowNum = 1;
-        row = sheet.createRow(1);
-        cell = row.createCell(0);
-        cell.setCellValue("**");
-        cell.setCellStyle(styles.get(CustomCellStyles.HEADER_STAR));
+            row = sheet.createRow(1);
+            cell = row.createCell(0);
+            cell.setCellValue("**");
+            cell.setCellStyle(styles.get(CustomCellStyles.HEADER_STAR));
 
-        for (int i = 0; i < stars.size(); i++) {
-            if (i % 10 == 0 && i != 0) {
-                rowNum++;
-                row = sheet.createRow(rowNum);
+            for (int i = 0; i < stars.size(); i++) {
+                if (i % 10 == 0 && i != 0) {
+                    rowNum++;
+                    row = sheet.createRow(rowNum);
+                }
+                row.createCell(i % 10 + 1).setCellValue(markerToName.get(stars.get(i)));
             }
-            row.createCell(i % 10 + 1).setCellValue(markerToName.get(stars.get(i)));
+            rowNum++;
         }
-        rowNum++;
 
         for (String type : sigilTypes) {
             row = sheet.createRow(rowNum);
@@ -595,34 +616,81 @@ public class MainWindow extends Application {
         }
 
         sheet.autoSizeColumn(0);
-        for (int i = 0; i < 13; i++) {
-            sheet.setColumnWidth(i + 1, 4096);
-        }
-        sheet.addMergedRegion(new CellRangeAddress(1, 3, 0, 0));
-        cellRange = new CellRangeAddress(0, 0, 1, 12);
-        sheet.addMergedRegion(cellRange);
-        RegionUtil.setBorderRight(BorderStyle.THIN, cellRange, sheet);
-        // This sheet is a lot more constant than the rest so I can safely hardcode all these
-        for (CellRangeAddress cr : new CellRangeAddress[]{
+        if (scavengerChoice == ScavengerMode.OFF) {
+            for (int i = 0; i < 13; i++) {
+                sheet.setColumnWidth(i + 1, 4096);
+            }
+            sheet.addMergedRegion(new CellRangeAddress(1, 3, 0, 0));
+            cellRange = new CellRangeAddress(0, 0, 1, 12);
+            sheet.addMergedRegion(cellRange);
+            RegionUtil.setBorderRight(BorderStyle.THIN, cellRange, sheet);
+            // This sheet is a lot more constant than the rest so I can safely hardcode all these
+            for (CellRangeAddress cr : new CellRangeAddress[]{
                 new CellRangeAddress(1, 3, 1, 12), // Stars
                 new CellRangeAddress(4, 8, 1, 12), // Greens
                 new CellRangeAddress(9, 11, 1, 12), // Greys
                 new CellRangeAddress(12, 18, 1, 12), // Yellows
                 new CellRangeAddress(19, 25, 1, 12) /*Reds*/}) {
-            RegionUtil.setBorderBottom(BorderStyle.THIN, cr, sheet);
-            RegionUtil.setBorderLeft(BorderStyle.THIN, cr, sheet);
-            RegionUtil.setBorderRight(BorderStyle.THIN, cr, sheet);
-            RegionUtil.setBorderTop(BorderStyle.THIN, cr, sheet);
-        }
-        RegionUtil.setBorderTop(BorderStyle.THIN, new CellRangeAddress(26, 26, 0, 0), sheet);
+                RegionUtil.setBorderBottom(BorderStyle.THIN, cr, sheet);
+                RegionUtil.setBorderLeft(BorderStyle.THIN, cr, sheet);
+                RegionUtil.setBorderRight(BorderStyle.THIN, cr, sheet);
+                RegionUtil.setBorderTop(BorderStyle.THIN, cr, sheet);
+            }
+            RegionUtil.setBorderTop(BorderStyle.THIN, new CellRangeAddress(26, 26, 0, 0), sheet);
+            // Scavenger is going to have different dimentions
+        } else {
+            int rows = 0;
+            int cols = 0;
+            // Again just kind of hardcode
+            switch (progress.getVar("Randomizer_ScavengerMode")) {
+                // Connector Clip
+                case 1: {
+                    rows = 4;
+                    cols = 2;
+                    RegionUtil.setBorderTop(BorderStyle.THIN, new CellRangeAddress(3, 3, 1, 2), sheet);
+                    break;
+                }
+                // F2 Clip
+                case 2: {
+                    rows = 7;
+                    cols = 6;
+                    RegionUtil.setBorderTop(BorderStyle.THIN, new CellRangeAddress(4, 4, 1, 6), sheet);
+                    break;
+                }
+                // F3 Clip
+                case 3: {
+                    rows = 5;
+                    cols = 4;
+                    break;
+                }
+                // F6
+                case 4: {
+                    rows = 5;
+                    cols = 4;
+                    RegionUtil.setBorderTop(BorderStyle.THIN, new CellRangeAddress(4, 4, 1, 4), sheet);
+                    break;
+                }
+            }
 
+            for (int i = 0; i < cols; i++) {
+                sheet.setColumnWidth(i + 1, 4096);
+            }
+            cellRange = new CellRangeAddress(0, 0, 1, cols);
+            sheet.addMergedRegion(cellRange);
+            RegionUtil.setBorderRight(BorderStyle.THIN, cellRange, sheet);
+            cellRange = new CellRangeAddress(1, rows, 1, cols);
+            RegionUtil.setBorderBottom(BorderStyle.THIN, cellRange, sheet);
+            RegionUtil.setBorderLeft(BorderStyle.THIN, cellRange, sheet);
+            RegionUtil.setBorderRight(BorderStyle.THIN, cellRange, sheet);
+            RegionUtil.setBorderTop(BorderStyle.THIN, cellRange, sheet);
+            RegionUtil.setBorderTop(BorderStyle.THIN, new CellRangeAddress(rows + 1, rows + 1, 0, 0), sheet);
+        }
 
         // Finally save the workbook
         try {
             workbook.write(outFile);
             outFile.close();
-        } catch (IOException e) {
-        }
+        } catch (IOException e) {}
     }
 
     private static HashMap<String, String> createMarkerToName() {
@@ -833,15 +901,22 @@ public class MainWindow extends Application {
             out.add("F3-Star");
         }
 
-        /*
-        // Scavenger only shows certain sigil types, so we remove markers leading to others
+        return removeHiddenScavengerSigils(out);
+    }
+
+    // Removes the markers for sigils that would normally be hidden because of scavenger
+    private ArrayList<String> removeHiddenScavengerSigils(ArrayList<String> markers) {
         if (progress.getVar("Randomizer_Scavenger") != 0) {
             ScavengerEnding ending = ScavengerEnding.fromInt(progress.getVar("Randomizer_ScavengerMode") - 1);
             ArrayList<String> allowedSigils = ending.getAllowedSigils();
+            for (String marker : (ArrayList<String>) markers.clone()) {
+                String sigil = TalosProgress.TETROS[progress.getVar(marker)];
+                if (!allowedSigils.contains(sigil)) {
+                    markers.remove(marker);
+                }
+            }
         }
-        */
-
-        return out;
+        return markers;
     }
 
     private World[] getWorldOrder() {
@@ -874,9 +949,9 @@ public class MainWindow extends Application {
     }
 
     private static String[] paint3Order = new String[]{
-            "A", "E", "F", "D", "E", "F", "D", "E",
-            "I", "A", "B", "C", "A", "B", "C", "A",
-            "E", "I", "G", "H", "I", "G", "H", "I"
+        "A", "E", "F", "D", "E", "F", "D", "E",
+        "I", "A", "B", "C", "A", "B", "C", "A",
+        "E", "I", "G", "H", "I", "G", "H", "I"
     };
 
     private static String paint3(int seed) {
@@ -888,18 +963,18 @@ public class MainWindow extends Application {
     }
 
     private static int[] paint5aOrder = new int[]{
-            3, 4, 3, 2, 1, 0, 4, 3,
-            1, 2, 1, 0, 4, 3, 2, 1,
-            4, 0, 4, 3, 2, 1, 0, 4,
-            2, 3, 2, 1, 0, 4, 3, 2,
-            0, 1, 0, 4, 3, 2, 1, 0
+        3, 4, 3, 2, 1, 0, 4, 3,
+        1, 2, 1, 0, 4, 3, 2, 1,
+        4, 0, 4, 3, 2, 1, 0, 4,
+        2, 3, 2, 1, 0, 4, 3, 2,
+        0, 1, 0, 4, 3, 2, 1, 0
     };
     private static String[] paint5aNames = new String[]{
-            "Behind Amphitheatre / Far C",
-            "Suicide Mission / 20%",
-            "Amphitheatre / Tower",
-            "A2 Star / B",
-            "Spawn / A/C"
+        "Behind Amphitheatre / Far C",
+        "Suicide Mission / 20%",
+        "Amphitheatre / Tower",
+        "A2 Star / B",
+        "Spawn / A/C"
     };
 
     private static String paint5a(int seed) {
@@ -907,18 +982,18 @@ public class MainWindow extends Application {
     }
 
     private static int[] paint5bOrder = new int[]{
-            4, 0, 0, 0, 0, 0, 0, 0,
-            2, 3, 3, 3, 3, 3, 3, 3,
-            0, 1, 1, 1, 1, 1, 1, 1,
-            3, 4, 4, 4, 4, 4, 4, 4,
-            1, 2, 2, 2, 2, 2, 2, 2,
+        4, 0, 0, 0, 0, 0, 0, 0,
+        2, 3, 3, 3, 3, 3, 3, 3,
+        0, 1, 1, 1, 1, 1, 1, 1,
+        3, 4, 4, 4, 4, 4, 4, 4,
+        1, 2, 2, 2, 2, 2, 2, 2,
     };
     private static String[] paint5bNames = new String[]{
-            "LMUStK / JfW/Nervewrecker",
-            "ABTU/SfL / Right of Spawn",
-            "AEP / JfW/Middle",
-            "LMUStK/SfL / Middle",
-            "SfL / Left of Spawn"
+        "LMUStK / JfW/Nervewrecker",
+        "ABTU/SfL / Right of Spawn",
+        "AEP / JfW/Middle",
+        "LMUStK/SfL / Middle",
+        "SfL / Left of Spawn"
     };
 
     private static String paint5b(int seed) {
@@ -926,38 +1001,38 @@ public class MainWindow extends Application {
     }
 
     private static String[] allMarkers = new String[]{
-            "A1-ASooR", "A1-Beaten Path", "A1-OtToU", "A1-Outnumbered",
-            "A1-PaSL", "A1-Peephole", "A1-Star", "A1-Trio",
-            "A2-Guards", "A2-Hall of Windows", "A2-Star", "A2-Suicide Mission",
-            "A3-ABTU Star", "A3-ABTU", "A3-AEP", "A3-Clock Star",
-            "A3-Stashed for Later", "A3-Swallowed the Key", "A4-Above All That", "A4-Branch it Out",
-            "A4-DCtS", "A4-Push it Further", "A4-Star", "A5-FC Star",
-            "A5-FC", "A5-OLB", "A5-Over the Fence", "A5-Two Boxes Star",
-            "A5-Two Boxes", "A5-YKYMCTS", "A6-Bichromatic", "A6-Deception",
-            "A6-Door too Far", "A6-Mobile Mindfield", "A6-Star", "A7-LFI",
-            "A7-Pinhole", "A7-Star", "A7-Trapped Inside", "A7-Two Buzzers",
-            "A7-WiaL", "A*-DDM", "A*-JfW", "A*-Nervewrecker",
-            "B1-Over the Fence", "B1-RoD", "B1-SaaS", "B1-Star",
-            "B1-Third Wheel", "B1-WtaD", "B2-Higher Ground", "B2-Moonshot",
-            "B2-MotM", "B2-Star", "B2-Tomb", "B3-Blown Away",
-            "B3-Eagle's Nest", "B3-Star", "B3-Sunshot", "B3-Woosh",
-            "B4-ABUH", "B4-Double-Plate", "B4-RPS", "B4-Self Help",
-            "B4-Sphinx Star", "B4-TRA Star", "B4-TRA", "B4-WAtC",
-            "B5-Chambers", "B5-Iron Curtain", "B5-Obelisk Star", "B5-Plates",
-            "B5-SES", "B5-Two Jammers", "B6-Crisscross", "B6-Egyptian Arcade",
-            "B6-JDaW", "B7-AFaF", "B7-BLoM", "B7-BSbS Star",
-            "B7-BSbS", "B7-Star", "B7-WLJ", "B*-Cat's Cradle",
-            "B*-Merry Go Round", "B*-Peekaboo", "C1-Blowback", "C1-Conservatory",
-            "C1-Labyrinth", "C1-MIA", "C1-Star", "C2-ADaaF",
-            "C2-Cemetery", "C2-Rapunzel", "C2-Short Wall", "C2-Star",
-            "C3-BSLS", "C3-Jammer Quarantine", "C3-Star", "C3-Three Connectors",
-            "C3-Weathertop", "C4-Armory", "C4-Oubliette Star", "C4-Oubliette",
-            "C4-Stables", "C4-Throne Room Star", "C4-Throne Room", "C5-Dumbwaiter Star",
-            "C5-Dumbwaiter", "C5-Time Crawls", "C5-Time Flies Star", "C5-Time Flies",
-            "C5-UCAJ Star", "C5-UCaJ", "C6-Circumlocution", "C6-Seven Doors",
-            "C6-Star", "C6-Two Way Street", "C7-Carrier Pigeons", "C7-Crisscross",
-            "C7-DMS", "C7-Prison Break", "C7-Star", "C*-Cobweb",
-            "C*-Nexus", "C*-Unreachable Garden", "CM-Star", "F0-Star",
-            "F3-Star"
+        "A1-ASooR", "A1-Beaten Path", "A1-OtToU", "A1-Outnumbered",
+        "A1-PaSL", "A1-Peephole", "A1-Star", "A1-Trio",
+        "A2-Guards", "A2-Hall of Windows", "A2-Star", "A2-Suicide Mission",
+        "A3-ABTU Star", "A3-ABTU", "A3-AEP", "A3-Clock Star",
+        "A3-Stashed for Later", "A3-Swallowed the Key", "A4-Above All That", "A4-Branch it Out",
+        "A4-DCtS", "A4-Push it Further", "A4-Star", "A5-FC Star",
+        "A5-FC", "A5-OLB", "A5-Over the Fence", "A5-Two Boxes Star",
+        "A5-Two Boxes", "A5-YKYMCTS", "A6-Bichromatic", "A6-Deception",
+        "A6-Door too Far", "A6-Mobile Mindfield", "A6-Star", "A7-LFI",
+        "A7-Pinhole", "A7-Star", "A7-Trapped Inside", "A7-Two Buzzers",
+        "A7-WiaL", "A*-DDM", "A*-JfW", "A*-Nervewrecker",
+        "B1-Over the Fence", "B1-RoD", "B1-SaaS", "B1-Star",
+        "B1-Third Wheel", "B1-WtaD", "B2-Higher Ground", "B2-Moonshot",
+        "B2-MotM", "B2-Star", "B2-Tomb", "B3-Blown Away",
+        "B3-Eagle's Nest", "B3-Star", "B3-Sunshot", "B3-Woosh",
+        "B4-ABUH", "B4-Double-Plate", "B4-RPS", "B4-Self Help",
+        "B4-Sphinx Star", "B4-TRA Star", "B4-TRA", "B4-WAtC",
+        "B5-Chambers", "B5-Iron Curtain", "B5-Obelisk Star", "B5-Plates",
+        "B5-SES", "B5-Two Jammers", "B6-Crisscross", "B6-Egyptian Arcade",
+        "B6-JDaW", "B7-AFaF", "B7-BLoM", "B7-BSbS Star",
+        "B7-BSbS", "B7-Star", "B7-WLJ", "B*-Cat's Cradle",
+        "B*-Merry Go Round", "B*-Peekaboo", "C1-Blowback", "C1-Conservatory",
+        "C1-Labyrinth", "C1-MIA", "C1-Star", "C2-ADaaF",
+        "C2-Cemetery", "C2-Rapunzel", "C2-Short Wall", "C2-Star",
+        "C3-BSLS", "C3-Jammer Quarantine", "C3-Star", "C3-Three Connectors",
+        "C3-Weathertop", "C4-Armory", "C4-Oubliette Star", "C4-Oubliette",
+        "C4-Stables", "C4-Throne Room Star", "C4-Throne Room", "C5-Dumbwaiter Star",
+        "C5-Dumbwaiter", "C5-Time Crawls", "C5-Time Flies Star", "C5-Time Flies",
+        "C5-UCAJ Star", "C5-UCaJ", "C6-Circumlocution", "C6-Seven Doors",
+        "C6-Star", "C6-Two Way Street", "C7-Carrier Pigeons", "C7-Crisscross",
+        "C7-DMS", "C7-Prison Break", "C7-Star", "C*-Cobweb",
+        "C*-Nexus", "C*-Unreachable Garden", "CM-Star", "F0-Star",
+        "F3-Star"
     };
 }
