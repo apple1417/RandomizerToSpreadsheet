@@ -156,17 +156,32 @@ public class MainWindow extends Application {
         topRightBoxes.get(2).fire();
         topRightBoxes.get(4).setDisable(true);
 
+        // Setup the options locking that normal goes on
         scavenger.setOnAction((obs) -> {
-            if (scavenger.getValue() == ScavengerMode.OFF) {
-                topRightBoxes.get(0).setDisable(false);
-                topRightBoxes.get(2).setDisable(false);
-            } else {
-                topRightBoxes.get(0).setDisable(true);
-                topRightBoxes.get(2).setDisable(true);
+            if (scavenger.getValue() != ScavengerMode.OFF) {
+                moody.setValue(MoodySigils.OFF);
                 topRightBoxes.get(0).setSelected(true);
                 topRightBoxes.get(2).setSelected(false);
             }
         });
+        moody.setOnAction((obs) -> {
+            if (moody.getValue() != MoodySigils.OFF) {
+                scavenger.setValue(ScavengerMode.OFF);
+            }
+        });
+        // Open All Worlds
+        topRightBoxes.get(0).setOnAction((obs) -> {
+            if (!topRightBoxes.get(0).isSelected()) {
+                scavenger.setValue(ScavengerMode.OFF);
+            }
+        });
+        // Unlock All Items
+        topRightBoxes.get(2).setOnAction((obs) -> {
+            if (topRightBoxes.get(0).isSelected()) {
+                scavenger.setValue(ScavengerMode.OFF);
+            }
+        });
+
 
         // The export button to actually save it to file
         Button exportButton = new Button("Export");
