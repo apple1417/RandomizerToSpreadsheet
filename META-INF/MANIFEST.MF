@@ -1,3 +1,3 @@
 Manifest-Version: 1.0
-Main-Class: apple1417.randomizer_to_spreadsheet.MainWindow
+Main-Class: apple1417.randomizer_to_spreadsheet.CommandParser
 
