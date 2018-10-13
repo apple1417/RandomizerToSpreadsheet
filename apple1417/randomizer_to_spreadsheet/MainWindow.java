@@ -104,7 +104,7 @@ public class MainWindow extends Application {
             new Text("Unlock All Items"),
             new Text("Show Full Signs"),
             new Text("Random Portals"),
-            new Text(""),
+            new Text("Jetpack"),
             new Text("")
         ));
         bottomRightLabels = new ArrayList<Text>();
@@ -136,7 +136,6 @@ public class MainWindow extends Application {
             root.add(bottomRightLabels.get(i), 2 + i, 3);
         }
         topRightBoxes.get(2).fire();
-        topRightBoxes.get(4).setDisable(true);
         topRightBoxes.get(5).setDisable(true);
 
         // Setup the options locking that normally goes on
@@ -194,6 +193,9 @@ public class MainWindow extends Application {
             }
             if (topRightBoxes.get(3).isSelected()) {
                 options.setVar("Randomizer_Portals", 1);
+            }
+            if (topRightBoxes.get(4).isSelected()) {
+                options.setVar("Randomizer_Jetpack", 1);
             }
 
             SpreadsheetCreator.createSpreadsheet(chooser.showSaveDialog(primaryStage), options);

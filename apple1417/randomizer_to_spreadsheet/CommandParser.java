@@ -30,6 +30,9 @@ public class CommandParser {
     private static boolean signs = true;
     @Option(names = {"-p", "--portals"})
     private static boolean portals = false;
+    @Option(names = {"-j", "--jetpack"})
+    private static boolean jetpack = false;
+
 
     // Use a File[] here so that this can continue without specifying a file
     @Parameters(paramLabel = "FILE", index = "0", description = "Save location")
@@ -57,6 +60,7 @@ public class CommandParser {
                 cmd.usage(System.err);
             } else if (!(0 <= mobius && mobius <= 63)) {
                 System.err.println("Invalid value for option '--mobius': expected value between 0 and 63 inclusive");
+                cmd.usage(System.err);
             } else {
                 cp.start();
             }
@@ -103,6 +107,9 @@ public class CommandParser {
         }
         if (portals) {
             options.setVar("Randomizer_Portals", 1);
+        }
+        if (jetpack) {
+            options.setVar("Randomizer_Jetpack", 1);
         }
 
         SpreadsheetCreator.createSpreadsheet(file[0], options);

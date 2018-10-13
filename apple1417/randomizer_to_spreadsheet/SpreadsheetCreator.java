@@ -155,6 +155,9 @@ public class SpreadsheetCreator {
         if (options.getVar("Randomizer_Portals") == 1) {
             pickedOptions += "/Random Portals";
         }
+        if (options.getVar("Randomizer_Jetpack") == 1) {
+            pickedOptions += "/Jetpack";
+        }
         if (mobius != 0) {
             pickedOptions += "/Mobius ";
             boolean pastFirst = false;
