@@ -10,7 +10,7 @@ import picocli.CommandLine.*;
 import java.io.File;
 import java.util.Arrays;
 
-@Command(name = "RandomizerToSpreadsheet", mixinStandardHelpOptions = true, version = "1.2.0-v11.2.0")
+@Command(name = "RandomizerToSpreadsheet.jar", mixinStandardHelpOptions = true, version = "1.2.2-v12.2.0")
 public class CommandParser {
     @Option(names = {"-s", "--seed"}, description = "Between 0 and 2147483647 inclusive")
     private static int seed = 0;
