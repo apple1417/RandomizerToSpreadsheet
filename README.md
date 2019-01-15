@@ -1,6 +1,8 @@
 # RandomizerToSpreadsheet
 Makes spreadsheets (for routing purposes) from the settings for the [Talos Principle Randomzier](https://github.com/apple1417/Talos-Sigil-Randomizer).
 
+[Example](https://drive.google.com/open?id=1h5kj1amMigCUU4DEzXofW4UxEiZiGDla)
+
 ### Usage
 Running the file as any normal executable will give you a simple gui to input various options and select a file to output to.
 
