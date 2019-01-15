@@ -85,6 +85,7 @@ public class CommandParser {
 
     public void start() {
         if (file == null) {
+            Logger.setGUI();
             MainWindow.start();
             return;
         }

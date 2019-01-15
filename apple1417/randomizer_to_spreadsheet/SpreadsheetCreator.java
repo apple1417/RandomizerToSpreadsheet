@@ -20,28 +20,35 @@ import java.util.HashMap;
 
 public class SpreadsheetCreator {
     public static void createSpreadsheet(File saveLoc, TalosProgress options) {
-        // No need to process everything if we can't save the file
-        if (saveLoc == null) {
-            System.err.println("No File Selected");
+        // Get a few useful values out of the options
+        long seed = options.getVar("Randomizer_Seed");
+        RandomizerMode mode = RandomizerMode.fromTalosProgress(options);
+        ScavengerMode scavenger = ScavengerMode.fromTalosProgress(options);
+        MoodySigils moody = MoodySigils.fromTalosProgress(options);
+        int mobius = options.getVar("Randomizer_Loop");
+        boolean portals = options.getVar("Randomizer_Portals") != -1;
+
+        GeneratorGeneric gen = new GeneratorGeneric(options);
+        TalosProgress progress;
+        try {
+            progress = gen.generate(seed);
+        } catch (Exception e) {
+            Logger.error("The selected options don't fully generate.\nThis is an issue with the Randomizer, not this program.");
             return;
         }
+
+        if (saveLoc == null) {
+            Logger.error("No file selected");
+            return;
+        }
+        // Don't want to create the file until all other possible errors have been checked
         FileOutputStream outFile;
         try {
             outFile = new FileOutputStream(saveLoc);
         } catch (FileNotFoundException e) {
-            System.err.println(e.toString());
+            Logger.error(e);
             return;
         }
-
-        // Get a few useful values out of the options
-        long seed = options.getVar("Randomizer_Seed");
-        RandomizerMode mode = RandomizerMode.fromInt(options.getVar("Randomizer_Mode"));
-        ScavengerMode scavenger = ScavengerMode.fromInt(options.getVar("Randomizer_Scavenger"));
-        MoodySigils moody = MoodySigils.fromInt(options.getVar("Randomizer_Moody"));
-        int mobius = options.getVar("Randomizer_Loop");
-        boolean portals = options.getVar("Randomizer_Portals") != -1;
-
-        TalosProgress progress = new GeneratorGeneric(options).generate(seed);
 
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet sheet;
@@ -128,7 +135,9 @@ public class SpreadsheetCreator {
         row.createCell(0).setCellValue("Floor 6:");
         row.createCell(1).setCellValue(progress.getVar("Code_Floor6"));
 
+        int rowIndex = 11;
         if ((mobius & MobiusOptions.RANDOM_ARRANGERS.getMask()) != 0) {
+            rowIndex += 2;
             row = sheet.createRow(11);
             row.createCell(0).setCellValue("Random Arrangers:");
             row = sheet.createRow(12);
@@ -141,6 +150,11 @@ public class SpreadsheetCreator {
                 }
             }
         }
+
+        row = sheet.createRow(rowIndex + 2);
+        row.createCell(0).setCellValue("Generator Info:");
+        row.createCell(1).setCellValue(gen.getInfo().split("\n")[0]);
+        rowIndex += 3;
 
         String pickedOptions = String.format("%d/%s", seed, mode);
         if (options.getVar("Randomizer_NoGates") == 1) {
