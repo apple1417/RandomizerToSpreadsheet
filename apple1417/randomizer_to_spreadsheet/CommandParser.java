@@ -10,7 +10,7 @@ import picocli.CommandLine.*;
 import java.io.File;
 import java.util.Arrays;
 
-@Command(name = "RandomizerToSpreadsheet.jar", mixinStandardHelpOptions = true, version = "1.2.2-v12.2.0")
+@Command(name = "RandomizerToSpreadsheet.jar", mixinStandardHelpOptions = true, version = "1.2.3-v12.2.2")
 public class CommandParser {
     @Option(names = {"-s", "--seed"}, description = "Between 0 and 2147483647 inclusive")
     private static int seed = 0;
@@ -32,6 +32,8 @@ public class CommandParser {
     private static boolean portals = false;
     @Option(names = {"-j", "--jetpack"})
     private static boolean jetpack = false;
+    @Option(names = {"-x", "--extra"})
+    private static boolean extra = false;
 
 
     // Use a File[] here so that this can continue without specifying a file
@@ -97,20 +99,23 @@ public class CommandParser {
         options.setVar("Randomizer_Moody", Arrays.asList(MoodySigils.values()).indexOf(moody));
         options.setVar("Randomizer_Loop", mobius);
 
+        // This one needs to be explicitly set to 0 if turned off
+        options.setVar("Randomizer_ShowAll", signs ? 1 : 0);
+
         if (open) {
             options.setVar("Randomizer_NoGates", 1);
         }
         if (items) {
             options.setVar("Randomizer_UnlockItems", 1);
         }
-        if (signs) {
-            options.setVar("Randomizer_ShowAll", 1);
-        }
         if (portals) {
             options.setVar("Randomizer_Portals", 1);
         }
         if (jetpack) {
             options.setVar("Randomizer_Jetpack", 1);
+        }
+        if (extra) {
+            options.setVar("Randomizer_ExtraSigils", 1);
         }
 
         SpreadsheetCreator.createSpreadsheet(file[0], options);

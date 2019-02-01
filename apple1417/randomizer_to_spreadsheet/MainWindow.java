@@ -105,7 +105,7 @@ public class MainWindow extends Application {
             new Text("Show Full Signs"),
             new Text("Random Portals"),
             new Text("Jetpack"),
-            new Text("")
+            new Text("Random Extra Sigils")
         ));
         bottomRightLabels = new ArrayList<Text>();
 
@@ -136,7 +136,6 @@ public class MainWindow extends Application {
             root.add(bottomRightLabels.get(i), 2 + i, 3);
         }
         topRightBoxes.get(2).fire();
-        topRightBoxes.get(5).setDisable(true);
 
         // Setup the options locking that normally goes on
         scavenger.setOnAction((obs) -> {
@@ -174,6 +173,9 @@ public class MainWindow extends Application {
             options.setVar("Randomizer_Scavenger", Arrays.asList(ScavengerMode.values()).indexOf((((ChoiceBox) leftOptions.get(2)).getValue())));
             options.setVar("Randomizer_Moody", Arrays.asList(MoodySigils.values()).indexOf((((ChoiceBox) leftOptions.get(3)).getValue())));
 
+            // This one needs to be explicitly set to 0 if turned off
+            options.setVar("Randomizer_ShowAll", topRightBoxes.get(2).isSelected() ? 1 : 0);
+
             int mobius = 0;
             for (int i = 0; i < bottomRightBoxes.size(); i++) {
                 if (bottomRightBoxes.get(i).isSelected()) {
@@ -188,14 +190,14 @@ public class MainWindow extends Application {
             if (topRightBoxes.get(1).isSelected()) {
                 options.setVar("Randomizer_UnlockItems", 1);
             }
-            if (topRightBoxes.get(2).isSelected()) {
-                options.setVar("Randomizer_ShowAll", 1);
-            }
             if (topRightBoxes.get(3).isSelected()) {
                 options.setVar("Randomizer_Portals", 1);
             }
             if (topRightBoxes.get(4).isSelected()) {
                 options.setVar("Randomizer_Jetpack", 1);
+            }
+            if (topRightBoxes.get(5).isSelected()) {
+                options.setVar("Randomizer_ExtraSigils", 1);
             }
 
             SpreadsheetCreator.createSpreadsheet(chooser.showSaveDialog(primaryStage), options);

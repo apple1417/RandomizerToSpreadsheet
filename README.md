@@ -24,5 +24,6 @@ java -jar RandomizerToSpreadsheet.jar [-ghijopV] [-b=<mobius>] [-c=<scav>]
   -p, --portals
   -s, --seed=<seed>        Between 0 and 2147483647 inclusive
   -V, --version            Print version information and exit.
+  -x, --extra
 ```
 By not specifying a file you will be launched into the gui version instead.

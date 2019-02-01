@@ -2,6 +2,7 @@ package apple1417.randomizer_to_spreadsheet;
 
 import apple1417.randomizer.Enums.*;
 import apple1417.randomizer.GeneratorGeneric;
+import apple1417.randomizer.Rand;
 import apple1417.randomizer.TalosProgress;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -46,7 +47,7 @@ public class SpreadsheetCreator {
         try {
             outFile = new FileOutputStream(saveLoc);
         } catch (FileNotFoundException e) {
-            Logger.error(e);
+            Logger.error("Cannot access file, it is probably being used by another process.");
             return;
         }
 
@@ -136,17 +137,83 @@ public class SpreadsheetCreator {
         row.createCell(1).setCellValue(progress.getVar("Code_Floor6"));
 
         int rowIndex = 11;
+        int maxWidth = 2;
+        if (progress.getVar("Randomizer_ExtraSigils") == 1) {
+            row = sheet.createRow(rowIndex + 1);
+            row.createCell(0).setCellValue("Random Extra Sigils:");
+            row = sheet.createRow(rowIndex + 2);
+            rowIndex += 3;
+
+            if (maxWidth < 15) {
+                maxWidth = 15;
+            }
+
+            // This is not something decided during generation so we have to manually work it out
+            Rand r = new Rand(progress.getVar("Randomizer_ExtraSeed"));
+            for (int i = 0; i < 20; i++) {
+                r.next(0, 0);
+            }
+            int[] sigilCounts = new int[]{
+                30,
+                2, 5, 3, 4, 4,
+                1, 1, 4, 1, 2, 10, 4,
+                6, 4, 10, 7, 4, 12, 6
+            };
+            String[] sigils = new String[]{
+                "**",
+                "DI", "DJ", "DL", "DT", "DZ",
+                "MI", "MJ", "ML", "MO", "MS", "MT", "MZ",
+                "NI", "NJ", "NL", "NO", "NS", "NT", "NZ"
+            };
+
+            int total = 0;
+            int[] weights = new int[sigils.length];
+            for (int i = 0; i < sigils.length; i++) {
+                int w = sigilCounts[i] == 0 ? 0 : (int) ((1f / sigilCounts[i]) * 100 + 0.5);
+                weights[i] = w;
+                total += w;
+            }
+
+            for (int col = 0; col < 15; col++) {
+                int selectedIndex = r.next(1, total) - 1;
+                int sigilIndex = 0;
+
+                while (selectedIndex > weights[sigilIndex]) {
+                    selectedIndex -= weights[sigilIndex];
+                    sigilIndex++;
+                }
+
+                String sigil = sigils[sigilIndex];
+                sigilCounts[sigilIndex]--;
+
+                total = 0;
+                for (int i = 0; i < sigils.length; i++) {
+                    int w = sigilCounts[i] == 0 ? 0 : (int) ((1f / sigilCounts[i]) * 100 + 0.5);
+                    weights[i] = w;
+                    total += w;
+                }
+
+                cell = row.createCell(col);
+                cell.setCellValue(sigil);
+                cell.setCellStyle(styles.get(CustomCellStyles.sigilToStyle(sigil)));
+            }
+        }
+
         if ((mobius & MobiusOptions.RANDOM_ARRANGERS.getMask()) != 0) {
-            rowIndex += 2;
-            row = sheet.createRow(11);
+            row = sheet.createRow(rowIndex + 1);
             row.createCell(0).setCellValue("Random Arrangers:");
-            row = sheet.createRow(12);
+            row = sheet.createRow(rowIndex + 2);
+            rowIndex += 3;
+
             int arrangers = progress.getVar("Randomizer_LoopArrangers");
             int colIndex = 0;
             for (MobiusRandomArrangers mra : MobiusRandomArrangers.values()) {
                 if ((arrangers & mra.getMask()) != 0) {
                     row.createCell(colIndex).setCellValue(mra.toString());
                     colIndex++;
+                    if (maxWidth < colIndex) {
+                        maxWidth = colIndex;
+                    }
                 }
             }
         }
@@ -172,6 +239,12 @@ public class SpreadsheetCreator {
         if (options.getVar("Randomizer_Jetpack") == 1) {
             pickedOptions += "/Jetpack";
         }
+        if (options.getVar("Randomizer_ExtraSigils") == 1) {
+            pickedOptions += "/Random Extra Sigils";
+        }
+        if (scavenger != ScavengerMode.OFF) {
+            pickedOptions += "/" + scavenger.toString() + " Scavenger";
+        }
         if (mobius != 0) {
             pickedOptions += "/Mobius ";
             boolean pastFirst = false;
@@ -182,17 +255,14 @@ public class SpreadsheetCreator {
                 }
             }
         }
-
-        if (scavenger != ScavengerMode.OFF) {
-            pickedOptions += "/" + scavenger.toString() + " Scavenger";
-        }
         if (moody != MoodySigils.OFF) {
             pickedOptions += "/Moody " + moody.toString();
         }
 
         // Doing this before adding pickedOptions because that's supposed to go over
-        sheet.autoSizeColumn(0);
-        sheet.autoSizeColumn(1);
+        for (int i = 0; i < maxWidth; i++) {
+            sheet.autoSizeColumn(i);
+        }
         sheet.createRow(0).createCell(0).setCellValue(pickedOptions);
 
 
@@ -298,7 +368,7 @@ public class SpreadsheetCreator {
 
         rowNum = 1;
         portalNum = 0;
-        int maxWidth = 1;
+        maxWidth = 1;
         for (World w : getWorldOrder(progress)) {
             ArrayList<Integer> worldSigilIds = new ArrayList<Integer>();
             for (String marker : getWorldMarkers(progress, w)) {
