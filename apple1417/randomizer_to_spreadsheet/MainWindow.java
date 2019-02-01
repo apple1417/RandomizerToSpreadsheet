@@ -5,6 +5,7 @@ import apple1417.randomizer.Enums.MoodySigils;
 import apple1417.randomizer.Enums.RandomizerMode;
 import apple1417.randomizer.Enums.ScavengerMode;
 import apple1417.randomizer.TalosProgress;
+import apple1417.randomizer_to_spreadsheet.spreadsheet_creator.MainFile;
 import javafx.application.Application;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -105,7 +106,7 @@ public class MainWindow extends Application {
             new Text("Show Full Signs"),
             new Text("Random Portals"),
             new Text("Jetpack"),
-            new Text("")
+            new Text("Random Extra Sigils")
         ));
         bottomRightLabels = new ArrayList<Text>();
 
@@ -136,7 +137,6 @@ public class MainWindow extends Application {
             root.add(bottomRightLabels.get(i), 2 + i, 3);
         }
         topRightBoxes.get(2).fire();
-        topRightBoxes.get(5).setDisable(true);
 
         // Setup the options locking that normally goes on
         scavenger.setOnAction((obs) -> {
@@ -197,8 +197,11 @@ public class MainWindow extends Application {
             if (topRightBoxes.get(4).isSelected()) {
                 options.setVar("Randomizer_Jetpack", 1);
             }
+            if (topRightBoxes.get(5).isSelected()) {
+                options.setVar("Randomizer_ExtraSigils", 1);
+            }
 
-            SpreadsheetCreator.createSpreadsheet(chooser.showSaveDialog(primaryStage), options);
+            MainFile.createSpreadsheet(chooser.showSaveDialog(primaryStage), options);
         });
         exportButton.setFont(new Font(18));
         exportButton.setMinWidth(150);

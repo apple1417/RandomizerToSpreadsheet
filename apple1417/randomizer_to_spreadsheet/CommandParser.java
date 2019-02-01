@@ -4,6 +4,7 @@ import apple1417.randomizer.Enums.MoodySigils;
 import apple1417.randomizer.Enums.RandomizerMode;
 import apple1417.randomizer.Enums.ScavengerMode;
 import apple1417.randomizer.TalosProgress;
+import apple1417.randomizer_to_spreadsheet.spreadsheet_creator.MainFile;
 import picocli.CommandLine;
 import picocli.CommandLine.*;
 
@@ -32,6 +33,8 @@ public class CommandParser {
     private static boolean portals = false;
     @Option(names = {"-j", "--jetpack"})
     private static boolean jetpack = false;
+    @Option(names = {"-x", "--extra"})
+    private static boolean extra = false;
 
 
     // Use a File[] here so that this can continue without specifying a file
@@ -112,7 +115,10 @@ public class CommandParser {
         if (jetpack) {
             options.setVar("Randomizer_Jetpack", 1);
         }
+        if (extra) {
+            options.setVar("Randomizer_ExtraSigils", 1);
+        }
 
-        SpreadsheetCreator.createSpreadsheet(file[0], options);
+        MainFile.createSpreadsheet(file[0], options);
     }
 }
