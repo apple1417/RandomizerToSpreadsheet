@@ -10,8 +10,10 @@ import picocli.CommandLine.*;
 import java.io.File;
 import java.util.Arrays;
 
-@Command(name = "RandomizerToSpreadsheet.jar", mixinStandardHelpOptions = true, version = "1.2.3-v12.2.2")
+@Command(name = "RandomizerToSpreadsheet.jar", mixinStandardHelpOptions = true, version = CommandParser.VERSION)
 public class CommandParser {
+    public static final String VERSION = "1.2.4-v12.2.2";
+
     @Option(names = {"-s", "--seed"}, description = "Between 0 and 2147483647 inclusive")
     private static int seed = 0;
     @Option(names = {"-m", "--mode"}, description = "One of: [NONE, DEFAULT, SIXTY, FULLY_RANDOM, INTENDED, HARDMODE, SIXTY_HARDMODE]")

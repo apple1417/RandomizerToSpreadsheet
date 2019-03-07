@@ -211,7 +211,7 @@ public class MainWindow extends Application {
 
         primaryStage.setScene(new Scene(root, 925, 165));
         primaryStage.setResizable(false);
-        primaryStage.setTitle("Randomizer To Spreadsheet");
+        primaryStage.setTitle("Randomizer To Spreadsheet " + CommandParser.VERSION);
         primaryStage.show();
 
         for (Text t : topRightLabels) {
