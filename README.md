@@ -27,3 +27,15 @@ java -jar RandomizerToSpreadsheet.jar [-ghijopV] [-b=<mobius>] [-c=<scav>]
   -x, --extra
 ```
 By not specifying a file you will be launched into the gui version instead.
+
+### Compiling manually
+
+This project makes use of three libraries you'll need to include if compiling manually:
+
+ * [Apache POI](https://poi.apache.org/) (3.17)
+ * [Picocli](https://github.com/remkop/picocli) (3.6.1)
+ * [Talos Randomizer](https://github.com/apple1417/random_stuff/tree/master/apple1417/randomizer) (Latest)
+ 
+Note that the Talos Randomizer "library" isn't a standard library in a jar, you want to download all the files in the
+ linked directory and put them in the same overall directory structure (src/apple1417/randomizer), then either make your
+ own jar and add it to your classpath or just add each of the compiled files separately.
